@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  db:
+    container_name: POSTGRESQL_DB
+    env_file: ".env"
+    image: postgres:16
+    ports:
+      - ${DATABASE_PORT}:5432
+    environment:
+      POSTGRES_DB: ${DATABASE_DATABASE}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    networks:
+      - ijs
+  redis:
+    container_name: REDIS
+    env_file: ".env"
+    image: redis:6.2.6
+    ports:
+      - ${REDIS_PORT}:6379
+    networks:
+      - ijs
+
+  api:
+    container_name: API
+    env_file: ".env"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - ${APP_PORT}:3000
+    networks:
+      - ijs
+    depends_on:
+      - db
+      - redis
+
+networks:
+  ijs:
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
